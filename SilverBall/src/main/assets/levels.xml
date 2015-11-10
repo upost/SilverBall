@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<levelPack name="A">
+    <levels>
+        <level number="1" points="1000" time="10">
+            <ball startx="1" starty="1"/>
+            <hole x="15" y="8"/>
+            <obstacles></obstacles>
+        </level>
+        <level number="2" points="2000" time="10">
+            <ball startx="1" starty="1"/>
+            <hole x="15" y="8"/>
+            <obstacles>
+                <obstacle type="wood1" x="4" y="1" w="1" h="6" />
+                <obstacle type="wood1" x="12" y="3" w="1" h="6" />
+            </obstacles>
+        </level>
+        <level number="3" points="2000" time="10">
+            <ball startx="1" starty="1"/>
+            <hole x="15" y="8"/>
+            <obstacles>
+                <obstacle type="wood2" x="4" y="3" w="6" h="1" />
+                <obstacle type="wood2" x="6" y="5" w="6" h="1" />
+                <obstacle type="wood2" x="4" y="7" w="6" h="1" />
+            </obstacles>
+        </level>
+        <level number="4" points="3000" time="15">
+            <ball startx="1" starty="1"/>
+            <hole x="7" y="6"/>
+            <obstacles>
+                <obstacle type="wood1" x="4"  y="2" w="1" h="6" />
+                <obstacle type="wood1" x="12" y="2" w="1" h="6" />
+                <obstacle type="wood2" x="4" y="7" w="8" h="1" />
+                <obstacle type="wood2" x="4" y="2" w="4" h="1" />
+            </obstacles>
+        </level>
+    </levels>
+</levelPack>
