@@ -43,12 +43,13 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
                 0, 0, 0, scale(16),
                 getResources().getColor(R.color.silver1), getResources().getColor(R.color.silver2),
                 Shader.TileMode.MIRROR));
-        setTypeface((TextView) findViewById(R.id.title), FONTNAME);
-        setTypeface((TextView) findViewById(R.id.title_back), FONTNAME);
-        setShader((TextView) findViewById(R.id.title_back), "silver");
-        setOutline((TextView) findViewById(R.id.title), 2);
-        setTypeface((TextView) findViewById(R.id.score), FONTNAME);
-        setShader((TextView) findViewById(R.id.score), "silver");
+        applyTypeface((TextView) findViewById(R.id.title), FONTNAME);
+        applyTypeface((TextView) findViewById(R.id.title_back), FONTNAME);
+        applyShader((TextView) findViewById(R.id.title_back), "silver");
+        applyOutline((TextView) findViewById(R.id.title), 2);
+        applyTypeface((TextView) findViewById(R.id.score), FONTNAME);
+        applyShader((TextView) findViewById(R.id.score), "silver");
+        applyEmboss((TextView) findViewById(R.id.score),new float[] { 0f, scale(1f), scale(0.5f) }, 0.8f, 3f, scale(3f));
         findViewById(R.id.title).setOnClickListener(this);
         container = (ViewGroup) findViewById(R.id.container);
         //gameView = new GameView(this);

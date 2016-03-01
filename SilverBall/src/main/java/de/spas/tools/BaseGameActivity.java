@@ -1,9 +1,11 @@
 package de.spas.tools;
 
 import android.app.Activity;
+import android.graphics.EmbossMaskFilter;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -40,20 +42,29 @@ public class BaseGameActivity extends Activity {
     }
 
 
-    protected void setTypeface(TextView v, String typefaceName) {
+    protected void applyTypeface(TextView v, String typefaceName) {
         Typeface t = getTypeface(typefaceName);
         if(t!=null) {
             v.setTypeface(t);
         }
     }
 
-    protected void setShader(TextView textView, String shaderName) {
+    protected void applyShader(TextView textView, String shaderName) {
         textView.getPaint().setShader(shaders.get(shaderName));
     }
 
-    protected void setOutline(TextView textView, float width) {
+    protected void applyOutline(TextView textView, float width) {
         textView.getPaint().setStyle(Paint.Style.STROKE);
         textView.getPaint().setStrokeWidth(scale(width));
+    }
+
+    protected void applyEmboss(TextView textView, float[] direction, float ambient,
+            float specular, float blurRadius) {
+        if (Build.VERSION.SDK_INT >= 11) {
+            textView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
+        EmbossMaskFilter filter = new EmbossMaskFilter(direction, ambient, specular, blurRadius);
+        textView.getPaint().setMaskFilter(filter);
     }
 
 
