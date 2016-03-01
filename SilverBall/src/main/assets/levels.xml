@@ -4,7 +4,8 @@
         <level number="1" points="1000" time="10">
             <ball startx="1" starty="1"/>
             <hole x="15" y="8"/>
-            <obstacles></obstacles>
+            <obstacles>
+            </obstacles>
         </level>
         <level number="2" points="2000" time="10">
             <ball startx="1" starty="1"/>

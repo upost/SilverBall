@@ -8,12 +8,14 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.util.Log;
 import android.view.SoundEffectConstants;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import de.spas.silverball.model.CollisionResult;
 import de.spas.silverball.model.Level;
 import de.spas.silverball.model.Obstacle;
 
@@ -24,8 +26,11 @@ import de.spas.silverball.model.Obstacle;
 public class GameEngine implements SensorEventListener, Runnable {
 
     private static final float BOUNCE_FACTOR = 0.25f;
-    private static final long MS_PER_FRAME = 25;
+    private static final long MS_PER_FRAME = 20;
     private static final float BOUNCE_SOUND_THRESHOLD = 500f;
+    private static final double BOUNCE_ANGLE_SOUND_THRESHOLD = 30.0*Math.PI/180;
+    public static final String LOG_TAG = "GameEngine";
+    private static final float HALT_BALL_THRESHOLD = 1f;
 
 
     interface OnBallInHoleListener {
@@ -138,6 +143,9 @@ public class GameEngine implements SensorEventListener, Runnable {
             return;
         }
 
+        float lastBallX = ballX;
+        float lastBallY = ballY;
+
         ballVX+=ballAX*MS_PER_FRAME/1000;
         ballVY+=ballAY*MS_PER_FRAME/1000;
         ballX+=ballVX*MS_PER_FRAME/1000;
@@ -146,8 +154,6 @@ public class GameEngine implements SensorEventListener, Runnable {
         points = Math.round((deadline-System.currentTimeMillis()) * pointsStart / time / 1000 );
         gameView.setPoints(points);
         //gameView.setCountdown((int) ((deadline-System.currentTimeMillis())/1000));
-        float lastBallX = ballX;
-        float lastBallY = ballY;
 
         if (ballX < minX) {
             if (ballVX < -BOUNCE_SOUND_THRESHOLD) playBounceSound();
@@ -176,33 +182,19 @@ public class GameEngine implements SensorEventListener, Runnable {
 
             collisionRect.set(o.getX()*hd, o.getY()*vd,(o.getX()+o.getW())*hd-1,(o.getY()+o.getH())*vd-1);
 
-            // left
-            if(ballVX>0 && ballX> collisionRect.left-ballRadius && ballX< collisionRect.right+ballRadius && ballY>= collisionRect.top && ballY<= collisionRect.bottom) {
-                if("deadly".equals(o.getType())) hitDeadlyObstacle();
-                if(ballVX>BOUNCE_SOUND_THRESHOLD) playBounceSound();
-                ballX= collisionRect.left-ballRadius; ballVX= -ballVX*BOUNCE_FACTOR;
-
-            }
-            // right
-            if(ballVX<0 && ballX> collisionRect.left-ballRadius && ballX< collisionRect.right+ballRadius && ballY>= collisionRect.top && ballY<= collisionRect.bottom) {
-                if("deadly".equals(o.getType())) hitDeadlyObstacle();
-                if(ballVX<-BOUNCE_SOUND_THRESHOLD) playBounceSound();
-                ballX= collisionRect.right+ballRadius; ballVX= -ballVX*BOUNCE_FACTOR;
-                playBounceSound();
-            }
-            // top
-            if(ballVY>0 && ballY> collisionRect.top-ballRadius && ballY< collisionRect.bottom+ballRadius && ballX>= collisionRect.left && ballX<= collisionRect.right) {
-                if("deadly".equals(o.getType())) hitDeadlyObstacle();
-                if(ballVY>BOUNCE_SOUND_THRESHOLD) playBounceSound();
-                ballY=collisionRect.top-ballRadius; ballVY = -ballVY*BOUNCE_FACTOR;
-                playBounceSound();
-            }
-            //bottom
-            if(ballVY<0 && ballY> collisionRect.top-ballRadius && ballY< collisionRect.bottom+ballRadius && ballX>= collisionRect.left && ballX<= collisionRect.right) {
-                if("deadly".equals(o.getType())) hitDeadlyObstacle();
-                if(ballVY< -BOUNCE_SOUND_THRESHOLD) playBounceSound();
-                ballY=collisionRect.bottom+ballRadius; ballVY = -ballVY*BOUNCE_FACTOR;
-                playBounceSound();
+            CollisionResult cr = checkCollision(collisionRect, ballX, ballY, ballVX, ballVY, ballRadius);
+            if(cr.isCollided()) {
+                Log.d(LOG_TAG,"collision: " + ballVX+"/"+ballVY + " → " + cr );
+                if(Math.abs(ballVX-cr.getVx())>HALT_BALL_THRESHOLD)
+                    ballX=lastBallX;
+                if(Math.abs(ballVY - cr.getVy())>HALT_BALL_THRESHOLD)
+                    ballY=lastBallY;
+                double angleBefore = Math.atan2(ballVY,ballVX);
+                double angleAfter = Math.atan2(cr.getVy(),cr.getVx());
+                ballVX=cr.getVx();
+                ballVY=cr.getVy();
+                if(Math.abs(angleBefore-angleAfter)>BOUNCE_ANGLE_SOUND_THRESHOLD)
+                    playBounceSound();
             }
         }
 
@@ -220,6 +212,44 @@ public class GameEngine implements SensorEventListener, Runnable {
 
         //Log.d(getClass().getSimpleName(), Integer.toString(gameView.getFps()) + " fps");
 
+    }
+
+    private CollisionResult checkCollision(RectF rect, float centerX, float centerY, float vx, float vy, float radius) {
+        // quadrants
+        float dx = Math.abs(centerX - rect.centerX());
+        float dy = Math.abs(centerY - rect.centerY());
+
+        // too far away for any collision
+        if(dx > rect.width()/2+radius) return CollisionResult.NO_COLLISION;
+        if(dy > rect.height()/2+radius)  return CollisionResult.NO_COLLISION;
+
+        // side collision
+        if(dx <= rect.width()/2) return new CollisionResult(vx,-vy*BOUNCE_FACTOR);
+        if(dy <= rect.height()/2) return new CollisionResult(-vx*BOUNCE_FACTOR,vy);
+
+        // corner collision
+        float cornerDistance_sq = (float) (Math.pow(dx - rect.width()/2,2) + Math.pow(dy - rect.height()/2,2));
+        if(cornerDistance_sq<=radius*radius) {
+            // calculate new direction
+            // dist corner->center
+            float cdx=Math.abs(dx-rect.width()/2)*Math.signum(centerX-rect.centerX());
+            float cdy=-Math.abs(dy-rect.height()/2)*Math.signum(centerY-rect.centerY());
+            // calc angles
+            // gamma is rotation of line from corner to ball center
+            double gamma = Math.atan2(cdy,cdx) * 180/Math.PI;
+            // rho is direction of velocity
+            double rho = Math.atan2(-vy,vx)* 180/Math.PI;
+            // delta is the angle between direction and line from corner to ball center
+            double delta = Math.abs(90+gamma-rho);
+            // alpha is the rotation to be applied
+            double alpha = 2*delta;
+            // apply the rotation matrix to the velocity
+            float newVx = (float) (Math.cos(alpha*Math.PI/180)*vx - Math.sin(alpha*Math.PI/180)*vy) ;
+            float newVy = (float) (Math.sin(alpha*Math.PI/180)*vx + Math.cos(alpha*Math.PI/180)*vy) ;
+
+            return new CollisionResult(newVx,newVy);
+        }
+        return CollisionResult.NO_COLLISION;
     }
 
     private void playBounceSound() {
