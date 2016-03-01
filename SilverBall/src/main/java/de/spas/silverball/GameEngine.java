@@ -25,7 +25,7 @@ public class GameEngine implements SensorEventListener, Runnable {
 
     private static final float BOUNCE_FACTOR = 0.25f;
     private static final long MS_PER_FRAME = 25;
-    private static final float BOUNCE_SOUND_THRESHOLD = 250f;
+    private static final float BOUNCE_SOUND_THRESHOLD = 500f;
 
 
     interface OnBallInHoleListener {
@@ -70,14 +70,6 @@ public class GameEngine implements SensorEventListener, Runnable {
         this.minY=minY;
         this.maxX=maxX;
         this.maxY=maxY;
-    }
-
-    public void setPointsStart(int pointsStart) {
-        this.pointsStart = pointsStart;
-    }
-
-    public void setTime(int time) {
-        this.time = time;
     }
 
     public void setBallPosition(float x, float y) {
@@ -153,7 +145,9 @@ public class GameEngine implements SensorEventListener, Runnable {
 
         points = Math.round((deadline-System.currentTimeMillis()) * pointsStart / time / 1000 );
         gameView.setPoints(points);
-        gameView.setCountdown((int) ((deadline-System.currentTimeMillis())/1000));
+        //gameView.setCountdown((int) ((deadline-System.currentTimeMillis())/1000));
+        float lastBallX = ballX;
+        float lastBallY = ballY;
 
         if (ballX < minX) {
             if (ballVX < -BOUNCE_SOUND_THRESHOLD) playBounceSound();

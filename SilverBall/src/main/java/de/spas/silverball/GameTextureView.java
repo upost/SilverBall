@@ -34,7 +34,6 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
     private float ballX,ballY;
     private float holeX,holeY;
     private float scale;
-    private int countdown;
     private int points;
     private int totalPoints;
     private BitmapDrawable ball;
@@ -84,10 +83,6 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
         obstacles.clear();
     }
 
-    public void setCountdown(int countdown) {
-        this.countdown = countdown;
-    }
-
     public void setPoints(int points) {
         this.points = points;
     }
@@ -106,7 +101,7 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
 
     protected void doDraw(Canvas canvas) {
         canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-        canvas.drawCircle(holeX, holeY, SIZE*scale/2, paintHole);
+        canvas.drawCircle(holeX, holeY, SIZE * scale / 2, paintHole);
         drawRect.set(ballX - SIZE * scale / 2, ballY - SIZE * scale / 2, ballX + SIZE * scale / 2, ballY + SIZE * scale / 2);
         canvas.drawBitmap(ball.getBitmap(), ballRect, drawRect, paintBitmap);
         for(Obstacle o : obstacles) {
@@ -117,9 +112,9 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
                     (o.getY()+o.getH())*getVerticalBaseDimension()-1);
             canvas.drawBitmap(bitmap, rect, drawRect, paintBitmap);
         }
-        canvas.drawText(Integer.toString(points),10*scale,canvas.getHeight()-30*scale, paintText);
-        canvas.drawText(Integer.toString(totalPoints),10*scale,40*scale, paintText);
-        canvas.drawText(Integer.toString(countdown),canvas.getWidth()-30*scale,canvas.getHeight()-30*scale, paintText);
+        canvas.drawText(Integer.toString(totalPoints),10*scale, 40*scale, paintText);
+        canvas.drawText(Integer.toString(points),canvas.getWidth()-30*scale,40*scale, paintText);
+        //canvas.drawText(Integer.toString(countdown),canvas.getWidth()-30*scale,canvas.getHeight()-30*scale, paintText);
         frames++;
     }
 
@@ -131,7 +126,7 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
             bitmaps.put(texture,bd.getBitmap());
             return bd.getBitmap();
         }
-        else Log.d("GameView", "texture not found: " + texture);
+        else Log.e("GameView", "texture not found: " + texture);
         return null;
     }
 
