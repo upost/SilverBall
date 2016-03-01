@@ -6,7 +6,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -175,7 +174,7 @@ public class GameEngine implements SensorEventListener, Runnable {
             });
         }
 
-        Log.d(getClass().getSimpleName(), Integer.toString(gameView.getFps()) + " fps");
+        //Log.d(getClass().getSimpleName(), Integer.toString(gameView.getFps()) + " fps");
 
     }
 

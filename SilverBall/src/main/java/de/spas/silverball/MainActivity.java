@@ -23,7 +23,8 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
 
     private final static String FONTNAME="airmole";
     //private GameView gameView;
-    private GameSurfaceView gameView;
+    //private GameSurfaceView gameView;
+    private GameTextureView gameView;
     private ViewGroup container;
     private GameEngine gameEngine;
     private LevelPack levelPack;
@@ -41,7 +42,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
         findViewById(R.id.title).setOnClickListener(this);
         container = (ViewGroup) findViewById(R.id.container);
         //gameView = new GameView(this);
-        gameView = new GameSurfaceView(this);
+        gameView = new GameTextureView(this);
         gameView.setTypeface(getTypeface(FONTNAME));
         container.addView(gameView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         gameOver();
