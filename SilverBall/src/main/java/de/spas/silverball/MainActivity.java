@@ -4,8 +4,10 @@ import android.content.Context;
 import android.graphics.LinearGradient;
 import android.graphics.Shader;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -31,6 +33,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
     private LevelPack levelPack;
     private int level;
     private int totalPoints;
+    private AudioManager audioManager;
 
 
     @Override
@@ -56,6 +59,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
         gameView = new GameTextureView(this);
         gameView.setTypeface(getTypeface(FONTNAME));
         container.addView(gameView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
         gameOver();
         try {
@@ -126,5 +130,21 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
     @Override
     public void onGameOver() {
         gameOver();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                        AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
+                return true;
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                        AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+                return true;
+            default:
+                return false;
+        }
     }
 }

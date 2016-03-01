@@ -7,6 +7,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Handler;
 import android.util.Log;
 import android.view.SoundEffectConstants;
@@ -31,6 +32,8 @@ public class GameEngine implements SensorEventListener, Runnable {
     private static final double BOUNCE_ANGLE_SOUND_THRESHOLD = 30.0*Math.PI/180;
     public static final String LOG_TAG = "GameEngine";
     private static final float HALT_BALL_THRESHOLD = 1f;
+    private final SoundPool soundPool;
+    private final int successSoundId, lavaSoundId;
 
 
     interface OnBallInHoleListener {
@@ -68,6 +71,10 @@ public class GameEngine implements SensorEventListener, Runnable {
         this.onGameOverListener = onGameOverListener;
         this.level = level;
         audioManager = (AudioManager) ((gameView.getContext().getSystemService(Context.AUDIO_SERVICE)));
+
+        soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+        successSoundId = soundPool.load(gameView.getContext(),R.raw.success,1);
+        lavaSoundId = soundPool.load(gameView.getContext(), R.raw.lava,1);
     }
 
     public void setRegion(float minX,float minY, float maxX, float maxY) {
@@ -185,21 +192,26 @@ public class GameEngine implements SensorEventListener, Runnable {
             CollisionResult cr = checkCollision(collisionRect, ballX, ballY, ballVX, ballVY, ballRadius);
             if(cr.isCollided()) {
                 Log.d(LOG_TAG,"collision: " + ballVX+"/"+ballVY + " → " + cr );
-                if(Math.abs(ballVX-cr.getVx())>HALT_BALL_THRESHOLD)
-                    ballX=lastBallX;
-                if(Math.abs(ballVY - cr.getVy())>HALT_BALL_THRESHOLD)
-                    ballY=lastBallY;
-                double angleBefore = Math.atan2(ballVY,ballVX);
-                double angleAfter = Math.atan2(cr.getVy(),cr.getVx());
-                ballVX=cr.getVx();
-                ballVY=cr.getVy();
-                if(Math.abs(angleBefore-angleAfter)>BOUNCE_ANGLE_SOUND_THRESHOLD)
-                    playBounceSound();
+                if("deadly".equals(o.getType()))
+                    hitDeadlyObstacle();
+                else {
+                    if (Math.abs(ballVX - cr.getVx()) > HALT_BALL_THRESHOLD)
+                        ballX = lastBallX;
+                    if (Math.abs(ballVY - cr.getVy()) > HALT_BALL_THRESHOLD)
+                        ballY = lastBallY;
+                    double angleBefore = Math.atan2(ballVY, ballVX);
+                    double angleAfter = Math.atan2(cr.getVy(), cr.getVx());
+                    ballVX = cr.getVx();
+                    ballVY = cr.getVy();
+                    if (Math.abs(angleBefore - angleAfter) > BOUNCE_ANGLE_SOUND_THRESHOLD)
+                        playBounceSound();
+                }
             }
         }
 
         if(Math.sqrt((ballX-holeX)*(ballX-holeX) + (ballY-holeY)*(ballY-holeY)) < holeRadius ) {
             stop();
+            playSuccessSound();
             handler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -212,6 +224,13 @@ public class GameEngine implements SensorEventListener, Runnable {
 
         //Log.d(getClass().getSimpleName(), Integer.toString(gameView.getFps()) + " fps");
 
+    }
+
+    private void playSuccessSound() {
+        if(successSoundId!=0) {
+
+            soundPool.play(successSoundId, 1, 1,1,0,1f);
+        }
     }
 
     private CollisionResult checkCollision(RectF rect, float centerX, float centerY, float vx, float vy, float radius) {
@@ -257,6 +276,10 @@ public class GameEngine implements SensorEventListener, Runnable {
     }
 
     private void hitDeadlyObstacle() {
+        if(lavaSoundId!=0) {
+
+            soundPool.play(lavaSoundId, 1, 1, 1, 0, 1f);
+        }
         stop();
         handler.post(new Runnable() {
             @Override
