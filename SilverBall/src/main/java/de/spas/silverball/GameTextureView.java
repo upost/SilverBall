@@ -58,7 +58,7 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
         paintHole.setAntiAlias(true);
         paintHole.setStyle(Paint.Style.FILL);
         paintText.setAntiAlias(true);
-        paintText.setColor(Color.argb(100, 255, 255, 255));
+        paintText.setColor(Color.argb(200, 255, 255, 255));
         paintText.setTextSize(scale * 30);
         paintText.setStyle(Paint.Style.FILL);
         ballRect.set(0, 0, ball.getBitmap().getWidth(), ball.getBitmap().getHeight());
@@ -77,10 +77,6 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
     public void setHolePosition(float x, float y) {
         holeX = x;
         holeY = y;
-    }
-
-    public void clearObstacles() {
-        obstacles.clear();
     }
 
     public void setPoints(int points) {
@@ -113,7 +109,7 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
             canvas.drawBitmap(bitmap, rect, drawRect, paintBitmap);
         }
         canvas.drawText(Integer.toString(totalPoints),10*scale, 40*scale, paintText);
-        canvas.drawText(Integer.toString(points),canvas.getWidth()-30*scale,40*scale, paintText);
+        canvas.drawText(Integer.toString(points),canvas.getWidth()-100*scale,40*scale, paintText);
         //canvas.drawText(Integer.toString(countdown),canvas.getWidth()-30*scale,canvas.getHeight()-30*scale, paintText);
         frames++;
     }

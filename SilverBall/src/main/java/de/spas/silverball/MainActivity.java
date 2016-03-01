@@ -25,10 +25,7 @@ import de.spas.tools.SimpleAnimationListener;
 public class MainActivity extends BaseGameActivity implements View.OnClickListener, GameEngine.OnBallInHoleListener, GameEngine.OnGameOverListener {
 
     private final static String FONTNAME="airmole";
-    //private GameView gameView;
-    //private GameSurfaceView gameView;
     private GameTextureView gameView;
-    private View menu;
     private ViewGroup container;
     private GameEngine gameEngine;
     private LevelPack levelPack;
@@ -55,7 +52,6 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
         applyEmboss((TextView) findViewById(R.id.score), new float[]{0f, scale(1f), scale(0.5f)}, 0.8f, 3f, scale(3f));
         findViewById(R.id.start).setOnClickListener(this);
         container = (ViewGroup) findViewById(R.id.container);
-        menu = (ViewGroup) findViewById(R.id.menu);
         //gameView = new GameView(this);
         gameView = new GameTextureView(this);
         gameView.setTypeface(getTypeface(FONTNAME));
