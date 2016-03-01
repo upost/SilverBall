@@ -3,6 +3,7 @@
 
     <string name="app_name">Silver Ball</string>
     <string name="score">Score</string>
+    <string name="start">Play!</string>
 
 
 </resources>

@@ -27,6 +27,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
     //private GameView gameView;
     //private GameSurfaceView gameView;
     private GameTextureView gameView;
+    private View menu;
     private ViewGroup container;
     private GameEngine gameEngine;
     private LevelPack levelPack;
@@ -43,19 +44,22 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
                 0, 0, 0, scale(16),
                 getResources().getColor(R.color.silver1), getResources().getColor(R.color.silver2),
                 Shader.TileMode.MIRROR));
+        applyTypeface((TextView) findViewById(R.id.start), FONTNAME);
         applyTypeface((TextView) findViewById(R.id.title), FONTNAME);
         applyTypeface((TextView) findViewById(R.id.title_back), FONTNAME);
         applyShader((TextView) findViewById(R.id.title_back), "silver");
         applyOutline((TextView) findViewById(R.id.title), 2);
         applyTypeface((TextView) findViewById(R.id.score), FONTNAME);
         applyShader((TextView) findViewById(R.id.score), "silver");
-        applyEmboss((TextView) findViewById(R.id.score),new float[] { 0f, scale(1f), scale(0.5f) }, 0.8f, 3f, scale(3f));
-        findViewById(R.id.title).setOnClickListener(this);
+        applyEmboss((TextView) findViewById(R.id.score), new float[]{0f, scale(1f), scale(0.5f)}, 0.8f, 3f, scale(3f));
+        findViewById(R.id.start).setOnClickListener(this);
         container = (ViewGroup) findViewById(R.id.container);
+        menu = (ViewGroup) findViewById(R.id.menu);
         //gameView = new GameView(this);
         gameView = new GameTextureView(this);
         gameView.setTypeface(getTypeface(FONTNAME));
         container.addView(gameView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
         gameOver();
         try {
             InputStream source = getAssets().open("levels.xml");
@@ -70,8 +74,8 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
 
     @Override
     public void onClick(View view) {
-        if(view.getId()==R.id.title) {
-            Animation a = AnimationUtils.loadAnimation(this,R.anim.abc_fade_out);
+        if(view.getId()==R.id.start) {
+            Animation a = AnimationUtils.loadAnimation(this,R.anim.buttonpress);
             a.setAnimationListener(new SimpleAnimationListener() {
                 @Override
                 public void onAnimationEnd(Animation animation) {
@@ -83,8 +87,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
     }
 
     private void startGame() {
-        hideView(R.id.title);
-        hideView(R.id.score);
+        hideView(R.id.menu);
         gameView.setVisibility(View.VISIBLE);
         level=0;
         totalPoints =0;
@@ -129,10 +132,9 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
     }
 
     private void gameOver() {
-        gameView.setVisibility(View.GONE);
-        showView(R.id.title);
+        showView(R.id.menu);
+        gameView.setVisibility(View.INVISIBLE);
         setText(R.id.score, getString(R.string.score) + " " + Integer.toString(totalPoints));
-        showView(R.id.score);
     }
 
 

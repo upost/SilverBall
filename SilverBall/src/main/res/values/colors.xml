@@ -5,5 +5,8 @@
     <color name="silver1">#ffffff</color>
     <color name="silver2">#d0d0ff</color>
     <color name="silver_border">#000033</color>
+    <color name="button">#f0f0ff</color>
+    <color name="button_light">#ffffff</color>
+    <color name="black">#000000</color>
 
 </resources>
