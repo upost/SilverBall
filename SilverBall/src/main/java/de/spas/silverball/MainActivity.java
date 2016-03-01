@@ -18,6 +18,7 @@ import org.simpleframework.xml.core.Persister;
 
 import java.io.InputStream;
 
+import de.spas.silverball.model.LevelPack;
 import de.spas.tools.BaseGameActivity;
 import de.spas.tools.SimpleAnimationListener;
 
@@ -96,19 +97,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
     }
 
     private void startLevel() {
-        Level l = levelPack.getLevels().get(level);
-        gameEngine = new GameEngine((SensorManager)getSystemService(Context.SENSOR_SERVICE),gameView,this,this);
-        float bd = gameView.getBaseDimension();
-        gameEngine.setRegion(bd /2, bd /2,container.getWidth()- bd /2,container.getHeight()- bd /2);
-        float horDim = container.getWidth()/16;
-        float verDim = container.getHeight()/9;
-        gameEngine.setBallPosition(l.getBall().getStartx() * horDim, l.getBall().getStarty() * verDim);
-        gameEngine.setHolePosition(l.getHole().getX()*horDim, l.getHole().getY()*verDim, bd /2);
-        gameEngine.setTime(l.getTime());
-        gameEngine.setPointsStart(l.getPoints());
-        for(Obstacle o : l.getObstacles()) {
-            gameEngine.addObstacle(o.getType(), o.getX()*horDim, o.getY()*verDim, o.getW()*horDim, o.getH()*verDim);
-        }
+        gameEngine = new GameEngine((SensorManager)getSystemService(Context.SENSOR_SERVICE),gameView,this,this,  levelPack.getLevels().get(level));
         gameEngine.start();
     }
 

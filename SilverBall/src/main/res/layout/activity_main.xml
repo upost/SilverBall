@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
         android:id="@+id/score"
-        android:textSize="64sp"
+        android:textSize="32sp"
         android:text="@string/score" />
 </FrameLayout>
 </FrameLayout>
