@@ -1,6 +1,8 @@
 package de.spas.tools;
 
 import android.app.Activity;
+import android.graphics.Paint;
+import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +17,7 @@ import java.util.Map;
 public class BaseGameActivity extends Activity {
 
     private Map<String,Typeface> typefaces = new HashMap<String,Typeface>();
+    private Map<String,Shader> shaders = new HashMap<String,Shader>();
     private float density;
 
     @Override
@@ -32,12 +35,27 @@ public class BaseGameActivity extends Activity {
         typefaces.put(name, typeface);
     }
 
+    protected void addShader(String name, Shader shader) {
+        shaders.put(name,shader);
+    }
+
+
     protected void setTypeface(TextView v, String typefaceName) {
         Typeface t = getTypeface(typefaceName);
         if(t!=null) {
             v.setTypeface(t);
         }
     }
+
+    protected void setShader(TextView textView, String shaderName) {
+        textView.getPaint().setShader(shaders.get(shaderName));
+    }
+
+    protected void setOutline(TextView textView, float width) {
+        textView.getPaint().setStyle(Paint.Style.STROKE);
+        textView.getPaint().setStrokeWidth(scale(width));
+    }
+
 
     protected Typeface getTypeface(String typefaceName) {
         return typefaces.get(typefaceName);

@@ -1,6 +1,8 @@
 package de.spas.silverball;
 
 import android.content.Context;
+import android.graphics.LinearGradient;
+import android.graphics.Shader;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,8 +39,16 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         addTypeface(FONTNAME);
+        addShader("silver", new LinearGradient(
+                0, 0, 0, scale(16),
+                getResources().getColor(R.color.silver1), getResources().getColor(R.color.silver2),
+                Shader.TileMode.MIRROR));
         setTypeface((TextView) findViewById(R.id.title), FONTNAME);
+        setTypeface((TextView) findViewById(R.id.title_back), FONTNAME);
+        setShader((TextView) findViewById(R.id.title_back), "silver");
+        setOutline((TextView) findViewById(R.id.title), 2);
         setTypeface((TextView) findViewById(R.id.score), FONTNAME);
+        setShader((TextView) findViewById(R.id.score), "silver");
         findViewById(R.id.title).setOnClickListener(this);
         container = (ViewGroup) findViewById(R.id.container);
         //gameView = new GameView(this);
@@ -54,6 +64,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
             Log.e(getClass().getSimpleName(), "loading levels threw exception", e);
         }
     }
+
 
 
     @Override

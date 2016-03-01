@@ -2,5 +2,8 @@
 <resources>
     <color name="blue">#5588ee</color>
     <color name="silver">#f0f0ff</color>
+    <color name="silver1">#ffffff</color>
+    <color name="silver2">#d0d0ff</color>
+    <color name="silver_border">#000033</color>
 
 </resources>
