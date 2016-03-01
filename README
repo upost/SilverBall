@@ -5,6 +5,8 @@ This is a simple game demo for Android (4+). Move the ball into the hole.
 The game uses a SurfaceView, TextureView or simple CustomView (choose which to use in MainActivity)
 and the accelerometer.
 
+This version also shows how to use Shaders and certain tricks to create fancy TextViews (see screenshot in misc folder).
+
 Explained in my german book "Spieleprogrammierung mit Android Studio", chapter 5:
 
 https://www.rheinwerk-verlag.de/spieleprogrammierung-mit-android-studio_3537/
