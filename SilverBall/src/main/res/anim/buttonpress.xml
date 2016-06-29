@@ -9,4 +9,5 @@
           android:toYScale="0.9"
           android:fromDegrees="0" 
           android:toDegrees="0"
-          android:duration="80" />
+          android:duration="80"
+    />

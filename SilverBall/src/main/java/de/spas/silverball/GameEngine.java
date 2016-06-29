@@ -9,7 +9,6 @@ import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Handler;
-import android.util.Log;
 import android.view.SoundEffectConstants;
 
 import java.util.concurrent.Executors;
@@ -191,7 +190,7 @@ public class GameEngine implements SensorEventListener, Runnable {
 
             CollisionResult cr = checkCollision(collisionRect, ballX, ballY, ballVX, ballVY, ballRadius);
             if(cr.isCollided()) {
-                Log.d(LOG_TAG,"collision: " + ballVX+"/"+ballVY + " → " + cr );
+                //Log.d(LOG_TAG,"collision: " + ballVX+"/"+ballVY + " → " + cr );
                 if("deadly".equals(o.getType()))
                     hitDeadlyObstacle();
                 else {
@@ -233,7 +232,7 @@ public class GameEngine implements SensorEventListener, Runnable {
         }
     }
 
-    private CollisionResult checkCollision(RectF rect, float centerX, float centerY, float vx, float vy, float radius) {
+    private static CollisionResult checkCollision(RectF rect, float centerX, float centerY, float vx, float vy, float radius) {
         // quadrants
         float dx = Math.abs(centerX - rect.centerX());
         float dy = Math.abs(centerY - rect.centerY());
