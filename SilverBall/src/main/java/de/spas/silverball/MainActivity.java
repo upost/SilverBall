@@ -2,6 +2,8 @@ package de.spas.silverball;
 
 import android.content.Context;
 import android.graphics.LinearGradient;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Shader;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
@@ -46,6 +48,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
                 getResources().getColor(R.color.silver1), getResources().getColor(R.color.silver2),
                 Shader.TileMode.MIRROR));
         applyTypeface((TextView) findViewById(R.id.start), FONTNAME);
+        ((TextView) findViewById(R.id.start)).getPaint().setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         applyTypeface((TextView) findViewById(R.id.title), FONTNAME);
         applyTypeface((TextView) findViewById(R.id.title_back), FONTNAME);
         applyShader((TextView) findViewById(R.id.title_back), "silver");
