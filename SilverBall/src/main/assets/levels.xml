@@ -4,102 +4,74 @@
         <level number="1" points="1000" time="10">
             <ball startx="1" starty="1"/>
             <hole x="15" y="8"/>
-            <obstacles>
-            </obstacles>
+            <traps/>
         </level>
         <level number="2" points="2000" time="10">
             <ball startx="1" starty="1"/>
             <hole x="15" y="8"/>
-            <obstacles>
-                <obstacle texture="wood1" x="4" y="1" w="1" h="6" />
-                <obstacle texture="wood1" x="12" y="3" w="1" h="6" />
-            </obstacles>
+            <traps>
+                <trap texture="abyss" x="7" y="4" w="2" h="2" />
+            </traps>
         </level>
         <level number="3" points="2000" time="10">
             <ball startx="1" starty="1"/>
             <hole x="15" y="8"/>
-            <obstacles>
-                <obstacle texture="wood2" x="4" y="3" w="6" h="1" />
-                <obstacle texture="wood2" x="6" y="5" w="6" h="1" />
-                <obstacle texture="wood2" x="4" y="7" w="6" h="1" />
-            </obstacles>
+            <traps>
+                <trap texture="water" x="5" y="4" w="6" h="2" />
+            </traps>
         </level>
         <level number="4" points="3000" time="15">
             <ball startx="1" starty="1"/>
             <hole x="7" y="6"/>
-            <obstacles>
-                <obstacle texture="wood1" x="4"  y="2" w="1" h="6" />
-                <obstacle texture="wood1" x="12" y="2" w="1" h="6" />
-                <obstacle texture="wood2" x="4" y="7" w="8" h="1" />
-                <obstacle texture="wood2" x="4" y="2" w="4" h="1" />
-            </obstacles>
+            <traps>
+                <trap texture="abyss" x="8" y="3" w="4" h="4" />
+            </traps>
         </level>
         <level number="5" points="7000" time="20">
             <ball startx="13" starty="0"/>
             <hole x="7" y="5"/>
-            <obstacles>
-                <obstacle texture="wood2" x="4"  y="1" w="6" h="1" />
-                <obstacle texture="wood2" x="10"  y="1" w="6" h="1" />
-                <obstacle texture="wood2" x="0" y="3" w="7" h="1" />
-                <obstacle texture="wood2" x="7" y="3" w="7" h="1" />
-                <obstacle texture="wood1" x="14" y="3" w="1" h="3" />
-                <obstacle texture="wood1" x="11" y="6" w="1" h="3" />
-                <obstacle texture="wood1" x="8" y="4" w="1" h="4" />
-                <obstacle texture="wood1" x="5" y="4" w="1" h="2" />
-                <obstacle texture="wood1" x="2" y="5" w="1" h="3" />
-                <obstacle texture="wood2" x="2" y="7" w="6" h="1" />
-            </obstacles>
+            <traps>
+                <trap texture="lava" x="7" y="0" w="2" h="3" />
+                <trap texture="lava" x="7" y="7" w="2" h="3" />
+            </traps>
         </level>
         <level number="6" points="8000" time="20">
-            <ball startx="8" starty="0"/>
+            <ball startx="1" starty="1"/>
             <hole x="15" y="5"/>
-            <obstacles>
-                <obstacle texture="metal" x="6"   y="0" w="1" h="4" />
-                <obstacle texture="metal" x="10"  y="0" w="1" h="6" />
-                <obstacle texture="metal" x="12"  y="1" w="1" h="5" />
-                <obstacle texture="metal" x="14"  y="1" w="1" h="3" />
-                <obstacle texture="metal" x="1"   y="1" w="1" h="6" />
-                <obstacle texture="metal" x="4"   y="1" w="1" h="2" />
-                <obstacle texture="metal" x="1"   y="1" w="4" h="1" />
-                <obstacle texture="metal" x="1"   y="6" w="5" h="1" />
-                <obstacle texture="metal" x="6"   y="6" w="5" h="1" />
-                <obstacle texture="metal" x="3"   y="4" w="4" h="1" />
-                <obstacle texture="metal" x="12"  y="6" w="5" h="1" />
-
-            </obstacles>
+            <traps>
+                <trap texture="lava" x="7" y="3" w="2" h="4" />
+                <trap texture="water" x="7" y="0" w="2" h="2" />
+                <trap texture="lava" x="7" y="8" w="2" h="2" />
+            </traps>
         </level>
         <level number="7" points="2000" time="15">
             <ball startx="1" starty="1"/>
             <hole x="15" y="8"/>
-            <obstacles>
-                <obstacle type="deadly" texture="lava" x="4" y="2" w="3" h="2" />
-                <obstacle type="deadly" texture="lava" x="4" y="5" w="3" h="2" />
-            </obstacles>
+            <traps>
+                <trap texture="lava" x="4" y="2" w="3" h="2" />
+                <trap texture="lava" x="4" y="5" w="3" h="2" />
+            </traps>
         </level>
         <level number="8" points="3000" time="20">
             <ball startx="1" starty="1"/>
             <hole x="14" y="1"/>
-            <obstacles>
-                <obstacle texture="metal" x="2" y="0" w="1" h="4" />
-                <obstacle texture="wood1" x="2" y="5" w="1" h="4" />
-                <obstacle type="deadly" texture="lava" x="4" y="4" w="3" h="2" />
-                <obstacle texture="wood1" x="8" y="0" w="1" h="4" />
-                <obstacle texture="metal" x="8" y="4" w="1" h="4" />
-                <obstacle type="deadly" texture="lava" x="10" y="5" w="3" h="2" />
-                <obstacle type="deadly" texture="lava" x="12" y="2" w="3" h="2" />
-            </obstacles>
+            <traps>
+                <trap texture="water" x="4" y="4" w="3" h="2" />
+                <trap texture="lava" x="10" y="5" w="3" h="2" />
+                <trap texture="water" x="12" y="2" w="3" h="2" />
+            </traps>
         </level>
         <level number="9" points="4000" time="20">
             <ball startx="1" starty="1"/>
             <hole x="8" y="8"/>
-            <obstacles>
-                <obstacle type="deadly" texture="lava" x="1" y="7" w="3" h="2" />
-                <obstacle type="deadly" texture="lava" x="3" y="1" w="3" h="2" />
-                <obstacle type="deadly" texture="lava" x="5" y="7" w="3" h="2" />
-                <obstacle type="deadly" texture="lava" x="7" y="1" w="3" h="2" />
-                <obstacle type="deadly" texture="lava" x="9" y="7" w="3" h="2" />
-                <obstacle type="deadly" texture="lava" x="11" y="1" w="3" h="2" />
-            </obstacles>
+            <traps>
+                <trap texture="lava" x="1" y="7" w="3" h="2" />
+                <trap texture="water" x="3" y="1" w="3" h="2" />
+                <trap texture="lava" x="5" y="7" w="3" h="2" />
+                <trap texture="water" x="7" y="1" w="3" h="2" />
+                <trap texture="lava" x="9" y="7" w="3" h="2" />
+                <trap texture="water" x="11" y="1" w="3" h="2" />
+            </traps>
         </level>
     </levels>
 </levelPack>

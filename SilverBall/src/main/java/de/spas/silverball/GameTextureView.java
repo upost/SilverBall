@@ -15,14 +15,14 @@ import android.util.Log;
 import android.view.TextureView;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import de.spas.silverball.model.Obstacle;
+import de.spas.silverball.model.Trap;
 
 /**
  * Created by uwe on 01.03.16.
@@ -44,10 +44,11 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
     private RectF drawRect = new RectF();
     private Rect ballRect = new Rect();
     private Rect rect = new Rect();
-    private List<Obstacle> obstacles = new ArrayList<Obstacle>();
+    private Collection<Trap> traps = new ArrayList<Trap>();
     private ScheduledExecutorService executorService;
     private long t;
     private long frames;
+    private String level;
 
     public GameTextureView(Context context) {
         super(context);
@@ -96,20 +97,30 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
     }
 
     protected void doDraw(Canvas canvas) {
+        // clear background
         canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+
+        // hole
         canvas.drawCircle(holeX, holeY, SIZE * scale / 2, paintHole);
-        drawRect.set(ballX - SIZE * scale / 2, ballY - SIZE * scale / 2, ballX + SIZE * scale / 2, ballY + SIZE * scale / 2);
-        canvas.drawBitmap(ball.getBitmap(), ballRect, drawRect, paintBitmap);
-        for(Obstacle o : obstacles) {
-            Bitmap bitmap = findCachedBitmap(o.getTexture());
+
+        // traps
+        for(Trap t : traps) {
+            Bitmap bitmap = findCachedBitmap(t.getTexture());
             rect.set(0,0,bitmap.getWidth()-1, bitmap.getHeight()-1);
-            drawRect.set(o.getX()*getHorizontalBaseDimension(), o.getY()*getVerticalBaseDimension(),
-                    (o.getX()+o.getW())*getHorizontalBaseDimension()-1,
-                    (o.getY()+o.getH())*getVerticalBaseDimension()-1);
+            drawRect.set(t.getX()*getHorizontalBaseDimension(), t.getY()*getVerticalBaseDimension(),
+                    (t.getX()+t.getW())*getHorizontalBaseDimension()-1,
+                    (t.getY()+t.getH())*getVerticalBaseDimension()-1);
             canvas.drawBitmap(bitmap, rect, drawRect, paintBitmap);
         }
+
+        // ball
+        drawRect.set(ballX - SIZE * scale / 2, ballY - SIZE * scale / 2, ballX + SIZE * scale / 2, ballY + SIZE * scale / 2);
+        canvas.drawBitmap(ball.getBitmap(), ballRect, drawRect, paintBitmap);
+
+        // score
         canvas.drawText(Integer.toString(totalPoints),10*scale, 40*scale, paintText);
         canvas.drawText(Integer.toString(points),canvas.getWidth()-100*scale,40*scale, paintText);
+        canvas.drawText("Level " + level, 10*scale,canvas.getHeight()-10*scale, paintText);
         //canvas.drawText(Integer.toString(countdown),canvas.getWidth()-30*scale,canvas.getHeight()-30*scale, paintText);
         frames++;
     }
@@ -180,9 +191,11 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
 
     }
 
-
-    public void setObstacles(List<Obstacle> obstacles) {
-        this.obstacles = obstacles;
+    public void setTraps(Collection<Trap> traps) {
+        this.traps = traps;
     }
 
+    public void setLevel(String level) {
+        this.level = level;
+    }
 }

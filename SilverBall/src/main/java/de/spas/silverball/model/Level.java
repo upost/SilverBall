@@ -15,7 +15,7 @@ public class Level {
     @Element private Hole hole;
     @Attribute private int points;
     @Attribute private int time;
-    @ElementList private List<Obstacle> obstacles;
+    @ElementList private List<Trap> traps;
 
     public int getNumber() {
         return number;
@@ -37,7 +37,7 @@ public class Level {
         return time;
     }
 
-    public List<Obstacle> getObstacles() {
-        return obstacles;
+    public List<Trap> getTraps() {
+        return traps;
     }
 }

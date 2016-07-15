@@ -41,6 +41,8 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // certain effects for the main menu
         setContentView(R.layout.activity_main);
         addTypeface(FONTNAME);
         addShader("silver", new LinearGradient(
@@ -48,6 +50,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
                 getResources().getColor(R.color.silver1), getResources().getColor(R.color.silver2),
                 Shader.TileMode.MIRROR));
         applyTypeface((TextView) findViewById(R.id.start), FONTNAME);
+        findViewById(R.id.start).setLayerType(View.LAYER_TYPE_SOFTWARE, null); // nice effects need software rendering
         ((TextView) findViewById(R.id.start)).getPaint().setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         applyTypeface((TextView) findViewById(R.id.title), FONTNAME);
         applyTypeface((TextView) findViewById(R.id.title_back), FONTNAME);
@@ -57,14 +60,13 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
         applyShader((TextView) findViewById(R.id.score), "silver");
         applyEmboss((TextView) findViewById(R.id.score), new float[]{0f, scale(1f), scale(0.5f)}, 0.8f, 3f, scale(3f));
         findViewById(R.id.start).setOnClickListener(this);
+
         container = (ViewGroup) findViewById(R.id.container);
-        //gameView = new GameView(this);
         gameView = new GameTextureView(this);
         gameView.setTypeface(getTypeface(FONTNAME));
         container.addView(gameView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
-        gameOver();
         try {
             InputStream source = getAssets().open("levels.xml");
             Serializer serializer = new Persister();
@@ -72,6 +74,9 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
         } catch (Exception e) {
             Log.e(getClass().getSimpleName(), "loading levels threw exception", e);
         }
+
+        gameOver();
+
     }
 
 
@@ -100,7 +105,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
     }
 
     private void startLevel() {
-        gameEngine = new GameEngine((SensorManager)getSystemService(Context.SENSOR_SERVICE),gameView,this,this,  levelPack.getLevels().get(level));
+        gameEngine = new GameEngine(this, (SensorManager)getSystemService(Context.SENSOR_SERVICE),gameView,this,this,  levelPack.getLevels().get(level));
         gameEngine.start();
     }
 
