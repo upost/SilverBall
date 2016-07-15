@@ -39,8 +39,8 @@
             <ball startx="1" starty="1"/>
             <hole x="15" y="5"/>
             <traps>
-                <trap texture="lava" x="7" y="3" w="2" h="4" />
-                <trap texture="water" x="7" y="0" w="2" h="2" />
+                <trap texture="lava" x="7" y="0" w="2" h="2" />
+                <trap texture="water" x="7" y="4" w="2" h="1" />
                 <trap texture="lava" x="7" y="8" w="2" h="2" />
             </traps>
         </level>

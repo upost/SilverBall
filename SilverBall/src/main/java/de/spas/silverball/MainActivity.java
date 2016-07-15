@@ -11,10 +11,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import org.simpleframework.xml.Serializer;
@@ -30,12 +28,12 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
 
     private final static String FONTNAME="airmole";
     private GameTextureView gameView;
-    private ViewGroup container;
     private GameEngine gameEngine;
     private LevelPack levelPack;
     private int level;
-    private int totalPoints;
+    private int highscore;
     private AudioManager audioManager;
+    private int currentScore;
 
 
     @Override
@@ -56,17 +54,17 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
         applyTypeface((TextView) findViewById(R.id.title_back), FONTNAME);
         applyShader((TextView) findViewById(R.id.title_back), "silver");
         applyOutline((TextView) findViewById(R.id.title), 2);
-        applyTypeface((TextView) findViewById(R.id.score), FONTNAME);
-        applyShader((TextView) findViewById(R.id.score), "silver");
-        applyEmboss((TextView) findViewById(R.id.score), new float[]{0f, scale(1f), scale(0.5f)}, 0.8f, 3f, scale(3f));
+        applyTypeface((TextView) findViewById(R.id.highscore), FONTNAME);
+        applyShader((TextView) findViewById(R.id.highscore), "silver");
+        applyEmboss((TextView) findViewById(R.id.highscore), new float[]{0f, scale(1f), scale(0.5f)}, 0.8f, 3f, scale(3f));
         findViewById(R.id.start).setOnClickListener(this);
 
-        container = (ViewGroup) findViewById(R.id.container);
-        gameView = new GameTextureView(this);
+        gameView = (GameTextureView) findViewById(R.id.gameview);
         gameView.setTypeface(getTypeface(FONTNAME));
-        container.addView(gameView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
+        // load levelpack
         try {
             InputStream source = getAssets().open("levels.xml");
             Serializer serializer = new Persister();
@@ -75,7 +73,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
             Log.e(getClass().getSimpleName(), "loading levels threw exception", e);
         }
 
-        gameOver();
+        onGameOver();
 
     }
 
@@ -97,10 +95,8 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
 
     private void startGame() {
         hideView(R.id.menu);
-        gameView.setVisibility(View.VISIBLE);
         level=0;
-        totalPoints =0;
-        gameView.setTotalPoints(totalPoints);
+        gameView.setTotalPoints(0);
         startLevel();
     }
 
@@ -117,29 +113,29 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
 
     @Override
     public void onBallInHole(int score) {
-        totalPoints += score;
-        gameView.setTotalPoints(totalPoints);
+        currentScore += score;
+        gameView.setTotalPoints(currentScore);
         gameView.invalidate();
         level++;
         if(levelPack.getLevels().size() > level) {
             startLevel();
         } else {
-            gameOver();
+            onGameOver();
         }
     }
 
-    private void gameOver() {
-        showView(R.id.menu);
-        gameView.setVisibility(View.INVISIBLE);
-        setText(R.id.score, getString(R.string.score) + " " + Integer.toString(totalPoints));
-    }
-
-
     @Override
     public void onGameOver() {
-        gameOver();
+        showView(R.id.menu);
+        Animation a = AnimationUtils.loadAnimation(this,R.anim.scalein);
+        findViewById(R.id.menu).startAnimation(a);
+        // starting an animation resets the layer type, so we need to change it again for our nice clear letters effect
+        findViewById(R.id.start).setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        if(currentScore >highscore) highscore= currentScore;
+        setText(R.id.highscore, getString(R.string.highscore) + " " + Integer.toString(highscore));
     }
 
+    // handle volume keys
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {

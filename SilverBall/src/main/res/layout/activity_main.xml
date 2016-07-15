@@ -2,10 +2,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/wood">
-    <FrameLayout
+    <de.spas.silverball.GameTextureView
+        android:id="@+id/gameview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/container"/>
+        android:layout_height="match_parent"/>
 <FrameLayout
     android:id="@+id/menu"
     android:layout_width="match_parent"
@@ -38,8 +38,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
-        android:id="@+id/score"
+        android:id="@+id/highscore"
         android:textSize="32sp"
-        android:text="@string/score" />
+        android:text="@string/highscore" />
 </FrameLayout>
 </FrameLayout>

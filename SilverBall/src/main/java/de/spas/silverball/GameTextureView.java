@@ -11,17 +11,17 @@ import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.TextureView;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import de.spas.silverball.model.Level;
 import de.spas.silverball.model.Trap;
 
 /**
@@ -30,7 +30,7 @@ import de.spas.silverball.model.Trap;
 public class GameTextureView extends TextureView implements TextureView.SurfaceTextureListener {
 
     private final static float SIZE = 32;
-    private static final long FRAME_INTERVAL = 15;
+    public static final long FRAME_INTERVAL = 20;
     private float ballX,ballY;
     private float holeX,holeY;
     private float scale;
@@ -44,14 +44,18 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
     private RectF drawRect = new RectF();
     private Rect ballRect = new Rect();
     private Rect rect = new Rect();
-    private Collection<Trap> traps = new ArrayList<Trap>();
     private ScheduledExecutorService executorService;
     private long t;
     private long frames;
-    private String level;
+    private Level level;
+    private RectF playfield;
+    private Trap hitTrap;
+    private boolean ballInHole;
+    private boolean playing;
 
-    public GameTextureView(Context context) {
-        super(context);
+    // this constructor is needed if the view shall show up in an layout xml
+    public GameTextureView(Context context, AttributeSet attrs) {
+        super(context, attrs);
         scale = getResources().getDisplayMetrics().density;
         ball = (BitmapDrawable) getResources().getDrawable(R.drawable.ball);
         paintBitmap.setAntiAlias(true);
@@ -69,6 +73,7 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
         setFocusable(false);
         setWillNotDraw(false);
     }
+
 
     public void setBallPosition(float x, float y) {
         ballX = x;
@@ -88,10 +93,6 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
         this.totalPoints = totalPoints;
     }
 
-    public float getBaseDimension() {
-        return scale*SIZE;
-    }
-
     public void setTypeface(Typeface typeface) {
         paintText.setTypeface(typeface);
     }
@@ -100,29 +101,41 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
         // clear background
         canvas.drawColor(0, PorterDuff.Mode.CLEAR);
 
+        if(level==null) return;
+
         // hole
-        canvas.drawCircle(holeX, holeY, SIZE * scale / 2, paintHole);
+        canvas.drawCircle(holeX, holeY, calcRadius(), paintHole);
+
+        ballInHole = Math.sqrt((ballX-holeX)*(ballX-holeX) + (ballY-holeY)*(ballY-holeY)) < calcRadius();
 
         // traps
-        for(Trap t : traps) {
+        hitTrap = null;
+        for(Trap t : level.getTraps()) {
             Bitmap bitmap = findCachedBitmap(t.getTexture());
             rect.set(0,0,bitmap.getWidth()-1, bitmap.getHeight()-1);
             drawRect.set(t.getX()*getHorizontalBaseDimension(), t.getY()*getVerticalBaseDimension(),
                     (t.getX()+t.getW())*getHorizontalBaseDimension()-1,
                     (t.getY()+t.getH())*getVerticalBaseDimension()-1);
+            if(drawRect.contains(ballX,ballY)) hitTrap = t;
             canvas.drawBitmap(bitmap, rect, drawRect, paintBitmap);
         }
 
-        // ball
-        drawRect.set(ballX - SIZE * scale / 2, ballY - SIZE * scale / 2, ballX + SIZE * scale / 2, ballY + SIZE * scale / 2);
-        canvas.drawBitmap(ball.getBitmap(), ballRect, drawRect, paintBitmap);
+        // draw ball only when round is active (points>0)
+        if(playing) {
+            drawRect.set(ballX - calcRadius(), ballY - calcRadius(), ballX + calcRadius(), ballY + calcRadius());
+            canvas.drawBitmap(ball.getBitmap(), ballRect, drawRect, paintBitmap);
+        }
 
         // score
         canvas.drawText(Integer.toString(totalPoints),10*scale, 40*scale, paintText);
         canvas.drawText(Integer.toString(points),canvas.getWidth()-100*scale,40*scale, paintText);
-        canvas.drawText("Level " + level, 10*scale,canvas.getHeight()-10*scale, paintText);
+        canvas.drawText("Level " + level.getNumber(), 10*scale,canvas.getHeight()-10*scale, paintText);
         //canvas.drawText(Integer.toString(countdown),canvas.getWidth()-30*scale,canvas.getHeight()-30*scale, paintText);
         frames++;
+    }
+
+    private float calcRadius() {
+        return SIZE * scale / 2;
     }
 
     private Bitmap findCachedBitmap(String texture) {
@@ -144,11 +157,11 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
         return (int) (frames/(delta /1000));
     }
 
-    public float getHorizontalBaseDimension() {
+    private float getHorizontalBaseDimension() {
         return getWidth()/16;
     }
 
-    public float getVerticalBaseDimension() {
+    private float getVerticalBaseDimension() {
         return getHeight()/9;
     }
 
@@ -191,11 +204,52 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
 
     }
 
-    public void setTraps(Collection<Trap> traps) {
-        this.traps = traps;
+    public void startLevel(Level level) {
+        this.level = level;
+        setBallPosition(level.getBall().getStartx() * getHorizontalBaseDimension(), level.getBall().getStarty() * getVerticalBaseDimension());
+        setHolePosition(level.getHole().getX() * getHorizontalBaseDimension(), level.getHole().getY() * getVerticalBaseDimension());
+        playfield = new RectF(calcRadius(), calcRadius(), getWidth()- calcRadius(), getHeight()- calcRadius());
+        playing=true;
     }
 
-    public void setLevel(String level) {
-        this.level = level;
+    public RectF getPlayfield() {
+        return playfield;
+    }
+
+    public void moveBall(float dx, float dy) {
+        ballX += dx;
+        ballY += dy;
+    }
+
+    public float getBallX() {
+        return ballX;
+    }
+
+    public float getBallY() {
+        return ballY;
+    }
+
+    public void setBallX(float ballX) {
+        this.ballX = ballX;
+    }
+
+    public void setBallY(float ballY) {
+        this.ballY = ballY;
+    }
+
+    public Trap getHitTrap() {
+        return  hitTrap;
+    }
+
+    public boolean isBallInHole() {
+        return ballInHole;
+    }
+
+    public boolean isBallInPlayfield() {
+        return playfield.contains(ballX,ballY);
+    }
+
+    public void setPlaying(boolean playing) {
+        this.playing = playing;
     }
 }
