@@ -2,8 +2,9 @@ SilverBall
 
 This is a simple game demo for Android (4+). Move the ball into the hole.
 
-The game uses a SurfaceView, TextureView or simple CustomView (choose which to use in MainActivity)
-and the accelerometer.
+The game uses a TextureView and the accelerometer.
+
+Simplified and refactored version (without obstacles causing collisions)
 
 This version also shows how to use Shaders and certain tricks to create fancy TextViews (see screenshot in misc folder).
 
