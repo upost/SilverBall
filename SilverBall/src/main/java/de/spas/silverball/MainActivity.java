@@ -127,10 +127,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
     @Override
     public void onGameOver() {
         showView(R.id.menu);
-        Animation a = AnimationUtils.loadAnimation(this,R.anim.scalein);
-        findViewById(R.id.menu).startAnimation(a);
-        // starting an animation resets the layer type, so we need to change it again for our nice clear letters effect
-        findViewById(R.id.start).setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        findViewById(R.id.menu).startAnimation(AnimationUtils.loadAnimation(this,R.anim.scalein));
         if(currentScore >highscore) highscore= currentScore;
         setText(R.id.highscore, getString(R.string.highscore) + " " + Integer.toString(highscore));
     }
