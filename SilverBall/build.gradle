@@ -23,10 +23,5 @@ android {
 }
 
 dependencies {
-    compile ('org.simpleframework:simple-xml:2.7.1') {
-        // we need to exclude the following to avoid certain annoying build problems
-        exclude group: "junit", module: "junit"
-        exclude group: "stax", module: "stax-api"
-        exclude group: "xpp3", module: "xpp3"
-    }
+    compile  'com.google.code.gson:gson:2.8.2'
 }

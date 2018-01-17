@@ -15,10 +15,10 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
+import com.google.gson.Gson;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import de.spas.silverball.model.LevelPack;
 import de.spas.tools.BaseGameActivity;
@@ -66,9 +66,9 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
 
         // load levelpack
         try {
-            InputStream source = getAssets().open("levels.xml");
-            Serializer serializer = new Persister();
-            levelPack = serializer.read(LevelPack.class, source);
+            InputStream source = getAssets().open("levels.json");
+            Gson gson = new Gson();
+            levelPack = gson.fromJson(new InputStreamReader(source),LevelPack.class);
         } catch (Exception e) {
             Log.e(getClass().getSimpleName(), "loading levels threw exception", e);
         }
