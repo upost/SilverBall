@@ -24,7 +24,7 @@ import de.spas.silverball.model.LevelPack;
 import de.spas.tools.BaseGameActivity;
 import de.spas.tools.SimpleAnimationListener;
 
-public class MainActivity extends BaseGameActivity implements View.OnClickListener, GameEngine.OnBallInHoleListener, GameEngine.OnGameOverListener {
+public class MainActivity extends BaseGameActivity implements View.OnClickListener, GameEngine.OnGameEventListener {
 
     private final static String FONTNAME="airmole";
     private GameTextureView gameView;
@@ -73,7 +73,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
             Log.e(getClass().getSimpleName(), "loading levels threw exception", e);
         }
 
-        onGameOver();
+        showMenu();
 
     }
 
@@ -101,7 +101,7 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
     }
 
     private void startLevel() {
-        gameEngine = new GameEngine(this, (SensorManager)getSystemService(Context.SENSOR_SERVICE),gameView,this,this,  levelPack.getLevels().get(level));
+        gameEngine = new GameEngine(this, (SensorManager)getSystemService(Context.SENSOR_SERVICE),gameView,this,  levelPack.getLevels().get(level));
         gameEngine.start();
     }
 
@@ -114,6 +114,10 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
     @Override
     public void onBallInHole(int score) {
         currentScore += score;
+        runOnUiThread(this::nextLevel);
+    }
+
+    public void nextLevel() {
         gameView.setTotalPoints(currentScore);
         gameView.invalidate();
         level++;
@@ -126,9 +130,13 @@ public class MainActivity extends BaseGameActivity implements View.OnClickListen
 
     @Override
     public void onGameOver() {
+        if(currentScore >highscore) highscore= currentScore;
+        runOnUiThread(this::showMenu);
+    }
+
+    public void showMenu() {
         showView(R.id.menu);
         findViewById(R.id.menu).startAnimation(AnimationUtils.loadAnimation(this,R.anim.scalein));
-        if(currentScore >highscore) highscore= currentScore;
         setText(R.id.highscore, getString(R.string.highscore) + " " + Integer.toString(highscore));
     }
 

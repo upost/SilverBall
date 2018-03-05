@@ -7,8 +7,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
-import android.os.Handler;
-import android.view.SoundEffectConstants;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 import de.spas.silverball.model.Level;
 import de.spas.silverball.model.Trap;
+import de.spas.math.Matrix2;
+import de.spas.math.Vector2;
 
 
 /**
@@ -23,46 +23,38 @@ import de.spas.silverball.model.Trap;
  */
 public class GameEngine implements SensorEventListener, Runnable {
 
-    private static final float BOUNCE_FACTOR = 0.25f;
     private static final long FRAME_INTERVAL = GameTextureView.FRAME_INTERVAL;
-    private static final float BOUNCE_SOUND_THRESHOLD = 500f;
+    private static final float BOUNCE_SOUND_THRESHOLD = 5f;
     public static final String LOG_TAG = "GameEngine";
     private final SoundPool soundPool;
-    private final int successSoundId, gameOverSoundId;
-    private final static float ACCELERATION_SCALE=400f;
-    private float ballVX, ballVY;
-    private float ballAX, ballAY;
+    private final int successSoundId, gameOverSoundId, hitSoundId;
+    private final static float ACCELERATION_SCALE=12f;
+    private Vector2 location, velocity, acceleration,previousPosition;
     private GameTextureView gameView;
     private SensorManager sensorManager;
     private ScheduledExecutorService service;
-    private Handler handler = new Handler();
-    private OnBallInHoleListener onBallInHoleListener;
-    private OnGameOverListener onGameOverListener;
+    private OnGameEventListener onGameEventListener;
     private final Level level;
     private int pointsStart;
     private int points;
     private int time;
     private long deadline;
-    private final AudioManager audioManager;
 
-    interface OnBallInHoleListener {
+
+    interface OnGameEventListener {
         void onBallInHole(int score);
-    }
-    interface OnGameOverListener {
         void onGameOver();
     }
 
-    public GameEngine(Context context, SensorManager sensorManager, GameTextureView gameView, OnBallInHoleListener onBallInHoleListener, OnGameOverListener onGameOverListener, Level level) {
+    public GameEngine(Context context, SensorManager sensorManager, GameTextureView gameView, OnGameEventListener onGameEventListener, Level level) {
         this.sensorManager = sensorManager;
         this.gameView = gameView;
-        this.onBallInHoleListener = onBallInHoleListener;
-        this.onGameOverListener = onGameOverListener;
+        this.onGameEventListener = onGameEventListener;
         this.level = level;
-        audioManager = (AudioManager) ((context.getSystemService(Context.AUDIO_SERVICE)));
-
         soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
         successSoundId = soundPool.load(context,R.raw.success,1);
         gameOverSoundId = soundPool.load(context, R.raw.lava,1);
+        hitSoundId = soundPool.load(context, R.raw.hit,1);
     }
 
 
@@ -71,10 +63,10 @@ public class GameEngine implements SensorEventListener, Runnable {
         service = Executors.newSingleThreadScheduledExecutor();
         Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME);
-        ballVX=0;
-        ballVY=0;
-        ballAX=0;
-        ballAY=0;
+        location = new Vector2(level.getBall().getStartx(), level.getBall().getStarty());
+        velocity = new Vector2();
+        previousPosition = new Vector2();
+        acceleration = new Vector2();
         time = level.getTime();
         deadline = System.currentTimeMillis()+time*1000;
         points = pointsStart = level.getPoints();
@@ -92,8 +84,8 @@ public class GameEngine implements SensorEventListener, Runnable {
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        ballAX = sensorEvent.values[1]*ACCELERATION_SCALE;
-        ballAY = sensorEvent.values[0]*ACCELERATION_SCALE;
+        acceleration.x = sensorEvent.values[1]*ACCELERATION_SCALE;
+        acceleration.y = sensorEvent.values[0]*ACCELERATION_SCALE;
     }
 
     @Override
@@ -106,47 +98,32 @@ public class GameEngine implements SensorEventListener, Runnable {
 
         if(System.currentTimeMillis() > deadline) {
             stop();
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    onGameOverListener.onGameOver();
-                }
-            });
+            onGameEventListener.onGameOver();
             return;
         }
 
         // ball movement
-        ballVX += ballAX* FRAME_INTERVAL /1000;
-        ballVY += ballAY* FRAME_INTERVAL /1000;
-
-        gameView.moveBall(ballVX* FRAME_INTERVAL /1000,ballVY* FRAME_INTERVAL /1000);
+        velocity.add(acceleration,FRAME_INTERVAL *0.001f);
+        previousPosition.copyFrom(location);
+        location.add(velocity, FRAME_INTERVAL *0.001f);
+        gameView.setBallPosition(location);
 
         // calc points
-        points = Math.round((deadline-System.currentTimeMillis()) * pointsStart / time / 1000 );
+        points = Math.round((deadline-System.currentTimeMillis()) * pointsStart*0.001f / time  );
         gameView.setPoints(points);
 
-        // check playfield bounds and bounce
-        if(!gameView.isBallInPlayfield()) {
-            if (gameView.getBallX() < gameView.getPlayfield().left) {
-                if (ballVX < -BOUNCE_SOUND_THRESHOLD) playBounceSound();
-                gameView.setBallX(gameView.getPlayfield().left);
-                ballVX = -ballVX * BOUNCE_FACTOR;
+        boolean bounced = gameView.checkBounce();
+        if(bounced) {
+            Matrix2 bounceMatrix = gameView.getBounceMatrix();
+            velocity = bounceMatrix.multiply(velocity);
+
+            if(velocity.length()>BOUNCE_SOUND_THRESHOLD) {
+                playSound(hitSoundId);
             }
-            if (gameView.getBallY() < gameView.getPlayfield().top) {
-                if (ballVY < -BOUNCE_SOUND_THRESHOLD) playBounceSound();
-                gameView.setBallY(gameView.getPlayfield().top);
-                ballVY = -ballVY * BOUNCE_FACTOR;
-            }
-            if (gameView.getBallX() > gameView.getPlayfield().right) {
-                if (ballVX > BOUNCE_SOUND_THRESHOLD) playBounceSound();
-                gameView.setBallX(gameView.getPlayfield().right);
-                ballVX = -ballVX * BOUNCE_FACTOR;
-            }
-            if (gameView.getBallY() > gameView.getPlayfield().bottom) {
-                if (ballVY > BOUNCE_SOUND_THRESHOLD) playBounceSound();
-                gameView.setBallY(gameView.getPlayfield().bottom);
-                ballVY = -ballVY * BOUNCE_FACTOR;
-            }
+            // move ball to bounced position instead
+            location.copyFrom(previousPosition);
+            location.add(velocity, FRAME_INTERVAL *0.001f);
+            gameView.setBallPosition(location);
         }
 
         Trap trap = gameView.getHitTrap();
@@ -158,40 +135,25 @@ public class GameEngine implements SensorEventListener, Runnable {
 
         if(gameView.isBallInHole()) {
             stop();
-            playSuccessSound();
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    onBallInHoleListener.onBallInHole(points);
-                }
-            });
+            playSound(successSoundId);
+            onGameEventListener.onBallInHole(points);
+
         }
 
         //Log.d(getClass().getSimpleName(), Integer.toString(gameView.getFps()) + " fps");
 
     }
 
-    private void playSuccessSound() {
-        if(successSoundId!=0) {
-            soundPool.play(successSoundId, 1, 1,1,0,1f);
-        }
+    private void playSound(int id) {
+            soundPool.play(id, 1, 1,1,0,1f);
     }
 
-    private void playBounceSound() {
-        audioManager.playSoundEffect(SoundEffectConstants.CLICK);
-    }
 
     private void hitTrap() {
-        if(gameOverSoundId !=0) {
-            soundPool.play(gameOverSoundId, 1, 1, 1, 0, 1f);
-        }
+        playSound(gameOverSoundId);
         stop();
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                onGameOverListener.onGameOver();
-            }
-        });
+        onGameEventListener.onGameOver();
+
     }
 
 

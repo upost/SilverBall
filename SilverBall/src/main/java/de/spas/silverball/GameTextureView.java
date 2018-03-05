@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 
 import de.spas.silverball.model.Level;
 import de.spas.silverball.model.Trap;
+import de.spas.math.Matrix2;
+import de.spas.math.Vector2;
 
 /**
  * Created by uwe on 01.03.16.
@@ -31,7 +33,8 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
 
     private final static float SIZE = 32;
     public static final long FRAME_INTERVAL = 20;
-    private float ballX,ballY;
+    private static final float BOUNCE_FACTOR = 0.25f;
+    private Vector2 ballLocation = new Vector2();
     private float holeX,holeY;
     private float scale;
     private int points;
@@ -52,6 +55,7 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
     private Trap hitTrap;
     private boolean ballInHole;
     private boolean playing;
+    private Matrix2 bounceMatrix = new Matrix2();
 
     // this constructor is needed if the view shall show up in an layout xml
     public GameTextureView(Context context, AttributeSet attrs) {
@@ -75,9 +79,9 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
     }
 
 
-    public void setBallPosition(float x, float y) {
-        ballX = x;
-        ballY = y;
+    public void setBallPosition(Vector2 pos) {
+        ballLocation.x = pos.x * getHorizontalBaseDimension();
+        ballLocation.y = pos.y * getVerticalBaseDimension();
     }
 
     public void setHolePosition(float x, float y) {
@@ -106,7 +110,7 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
         // hole
         canvas.drawCircle(holeX, holeY, calcRadius(), paintHole);
 
-        ballInHole = Math.sqrt((ballX-holeX)*(ballX-holeX) + (ballY-holeY)*(ballY-holeY)) < calcRadius();
+        ballInHole = Math.sqrt((ballLocation.x-holeX)*(ballLocation.x-holeX) + (ballLocation.y-holeY)*(ballLocation.y-holeY)) < calcRadius();
 
         // traps
         hitTrap = null;
@@ -116,13 +120,13 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
             drawRect.set(t.getX()*getHorizontalBaseDimension(), t.getY()*getVerticalBaseDimension(),
                     (t.getX()+t.getW())*getHorizontalBaseDimension()-1,
                     (t.getY()+t.getH())*getVerticalBaseDimension()-1);
-            if(drawRect.contains(ballX,ballY)) hitTrap = t;
+            if(drawRect.contains(ballLocation.x,ballLocation.y)) hitTrap = t;
             canvas.drawBitmap(bitmap, rect, drawRect, paintBitmap);
         }
 
         // draw ball only when round is active (points>0)
         if(playing) {
-            drawRect.set(ballX - calcRadius(), ballY - calcRadius(), ballX + calcRadius(), ballY + calcRadius());
+            drawRect.set(ballLocation.x - calcRadius(), ballLocation.y - calcRadius(), ballLocation.x + calcRadius(), ballLocation.y + calcRadius());
             canvas.drawBitmap(ball.getBitmap(), ballRect, drawRect, paintBitmap);
         }
 
@@ -165,25 +169,22 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
         return getHeight()/9;
     }
 
-    private Runnable renderer = new Runnable() {
-        @Override
-        public void run() {
-            Canvas canvas=null;
-            try {
-                canvas = lockCanvas();
-                doDraw(canvas);
-            }
-            finally {
-                unlockCanvasAndPost(canvas);
-            }
+    private void render() {
+        Canvas canvas=null;
+        try {
+            canvas = lockCanvas();
+            doDraw(canvas);
         }
-    };
+        finally {
+            unlockCanvasAndPost(canvas);
+        }
+    }
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         executorService = Executors.newSingleThreadScheduledExecutor();
         t= System.currentTimeMillis();
-        executorService.scheduleAtFixedRate(renderer, FRAME_INTERVAL, FRAME_INTERVAL, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(this::render, FRAME_INTERVAL, FRAME_INTERVAL, TimeUnit.MILLISECONDS);
         Log.d(getClass().getSimpleName(), "onSurfaceTextureAvailable");
     }
 
@@ -206,7 +207,6 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
 
     public void startLevel(Level level) {
         this.level = level;
-        setBallPosition(level.getBall().getStartx() * getHorizontalBaseDimension(), level.getBall().getStarty() * getVerticalBaseDimension());
         setHolePosition(level.getHole().getX() * getHorizontalBaseDimension(), level.getHole().getY() * getVerticalBaseDimension());
         playfield = new RectF(calcRadius(), calcRadius(), getWidth()- calcRadius(), getHeight()- calcRadius());
         playing=true;
@@ -214,27 +214,6 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
 
     public RectF getPlayfield() {
         return playfield;
-    }
-
-    public void moveBall(float dx, float dy) {
-        ballX += dx;
-        ballY += dy;
-    }
-
-    public float getBallX() {
-        return ballX;
-    }
-
-    public float getBallY() {
-        return ballY;
-    }
-
-    public void setBallX(float ballX) {
-        this.ballX = ballX;
-    }
-
-    public void setBallY(float ballY) {
-        this.ballY = ballY;
     }
 
     public Trap getHitTrap() {
@@ -245,11 +224,38 @@ public class GameTextureView extends TextureView implements TextureView.SurfaceT
         return ballInHole;
     }
 
-    public boolean isBallInPlayfield() {
-        return playfield.contains(ballX,ballY);
-    }
-
     public void setPlaying(boolean playing) {
         this.playing = playing;
+    }
+
+    public Matrix2 getBounceMatrix() {
+        return bounceMatrix;
+    }
+
+    public boolean checkBounce() {
+        boolean res=false;
+        bounceMatrix.unity();
+        // check playfield bounds and bounce
+        if (ballLocation.x < getPlayfield().left) {
+            ballLocation.x = getPlayfield().left;
+            bounceMatrix.xx=-BOUNCE_FACTOR;
+            res=true;
+        }
+        if (ballLocation.y < getPlayfield().top) {
+            ballLocation.y = getPlayfield().top;
+            bounceMatrix.yy=-BOUNCE_FACTOR;
+            res=true;
+        }
+        if (ballLocation.x > getPlayfield().right) {
+            ballLocation.x = getPlayfield().right;
+            bounceMatrix.xx=-BOUNCE_FACTOR;
+            res=true;
+        }
+        if (ballLocation.y > getPlayfield().bottom) {
+            ballLocation.y = getPlayfield().bottom;
+            bounceMatrix.yy=-BOUNCE_FACTOR;
+            res=true;
+        }
+        return res;
     }
 }
