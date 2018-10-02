@@ -2,25 +2,25 @@ buildscript {
     repositories {
         mavenCentral()
         google()
-        jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.4'
+        classpath 'com.android.tools.build:gradle:3.2.0'
     }
 }
 apply plugin: 'com.android.application'
 
 repositories {
     mavenCentral()
+    google()
 }
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion 28
     }
     compileOptions {
         targetCompatibility 1.8
@@ -29,5 +29,5 @@ android {
 }
 
 dependencies {
-    compile  'com.google.code.gson:gson:2.8.5'
+    implementation  'com.google.code.gson:gson:2.8.5'
 }

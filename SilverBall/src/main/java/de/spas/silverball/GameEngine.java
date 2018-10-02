@@ -21,7 +21,7 @@ import de.spas.math.Vector2;
 /**
  * Created by uwe on 23.09.13.
  */
-public class GameEngine implements SensorEventListener, Runnable {
+public class GameEngine implements SensorEventListener {
 
     private static final long FRAME_INTERVAL = GameTextureView.FRAME_INTERVAL;
     private static final float BOUNCE_SOUND_THRESHOLD = 5f;
@@ -73,7 +73,7 @@ public class GameEngine implements SensorEventListener, Runnable {
 
         gameView.startLevel(level);
 
-        service.scheduleAtFixedRate(this, FRAME_INTERVAL, FRAME_INTERVAL, TimeUnit.MILLISECONDS);
+        service.scheduleAtFixedRate(this::gameLoop, FRAME_INTERVAL, FRAME_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
     public void stop() {
@@ -93,8 +93,8 @@ public class GameEngine implements SensorEventListener, Runnable {
         // not needed
     }
 
-    @Override
-    public void run() {
+
+    public void gameLoop() {
 
         if(System.currentTimeMillis() > deadline) {
             stop();
